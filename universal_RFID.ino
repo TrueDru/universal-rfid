@@ -32,11 +32,12 @@ void setup()
   // Запуск serial (последовательного) порта:
   delay(2000);
   Serial.begin(115200); 
-  while(!Serial){;}
   // Инициализация microsd карты:
-  Serial.print("Инициализация microsd карты... "); 
-  if (!SD.begin(10)){Serial.println("ошибка инициализации!");while(1);} 
-  Serial.println("инициализация произведена."); 
+  if (!SD.begin(10))
+  {
+   Serial.println("ошибка инициализации!");
+   while(1);
+  } 
   //Вывод списка файлов:
   root = SD.open("/KEYS");
   printDirectory(root);
@@ -59,7 +60,7 @@ void setup()
 //Функция читает файлы в папке, объявленной в переменной "root" и выводит их в Serial.print
 String printDirectory(File dir) 
 {
- Serial.print("Список файлов на microsd карте:\n");
+ Serial.println("Список файлов на microsd карте:");
  while (true) 
  {
   File entry =  dir.openNextFile();
@@ -69,9 +70,8 @@ String printDirectory(File dir)
   entry.close();
   NumOfFiles++;   
  } 
- Serial.print("Кол-во файлов на microsd карте: ");
- Serial.print(NumOfFiles);
- Serial.println();
+ Serial.print("Файлов на microsd карте: ");
+ Serial.println(NumOfFiles);
  FileNames = new String[NumOfFiles];
 }
 
@@ -98,6 +98,7 @@ void print_inf(int)
   oled.setScale(1);  
   oled.print("Active: False");  
   Serial.print(CurrentFileNum);
+  Serial.print(" ");
   Serial.println(FileNames[CurrentFileNum]);
 }
 void loop()
@@ -117,10 +118,18 @@ void loop()
   }
  if (MainButt.isTriple())
   {
-   Serial.print(FileNames[CurrentFileNum]); 
-   Serial.print(" key is active\n");
+   String PATH = "/KEYS/"+FileNames[CurrentFileNum];
+   File keyfile = SD.open(PATH);
+   Serial.println(FileNames[CurrentFileNum]+" key is active");
+   String content = "";
+   while (keyfile.available())
+   {
+    content += (char)keyfile.read();
+   }
+   Serial.print(content);
+   Serial.println();
    oled.setCursor(0, 3);
    oled.setScale(1); 
-   oled.print("Active: True ");  
+   oled.print("Active: True "); 
   }
 }
